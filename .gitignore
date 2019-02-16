@@ -30,3 +30,7 @@
 *.exe
 *.out
 *.app
+
+# Folder
+gnu-decstation-ultrix/
+
