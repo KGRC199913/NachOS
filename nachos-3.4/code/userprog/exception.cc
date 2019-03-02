@@ -52,6 +52,77 @@ void
 ExceptionHandler(ExceptionType which)
 {
     int type = machine->ReadRegister(2);
+<<<<<<< HEAD
+    if (which == NoException)
+        return;
+    else if (which == SyscallExeption) {
+        switch (type) {
+                case SC_Halt:
+                {
+	                DEBUG('a', "Shutdown, initiated by user program.\n");
+   	                interrupt->Halt();
+                    break;
+                }
+                case SC_Exit:{
+   	                Exit(0);
+                    break;
+                }
+                case SC_Exec:{
+                
+                }
+                case SC_Join:{}
+                case SC_Create:{}
+                case SC_Open:{}
+                case SC_Read:{}
+                case SC_Close:{}
+                case SC_Fork:{}
+                case SC_Yield:{}
+                default:{}
+        }
+    }
+	else {
+		ExceptionHandler_NonSyscall(which, type);
+	}
+}
+
+void ExceptionHandler_NonSyscall(ExceptionType which, int type) {
+    /*
+    Handle non-syscall exceptions
+    @param which: Exception type, type: syscall codes in r2
+    @return void
+    */
+	switch (which){
+		case PageFaultException: {
+			printf("No valid translation found/%d %d\n", which, type);
+			ASSERT(FALSE);
+		}
+		case ReadOnlyException: {
+			printf("Write attempted on page marked 'read-only'/%d %d\n", which, type);
+			ASSERT(FALSE); 
+		}
+		case BusErrorException: {
+			printf("Translation result in an invalid physical address/%d %d\n", which, type);
+			ASSERT(FALSE);
+		}
+		case AddressErrorException: {
+			printf("Unaligned reference or one that was beyond the endof the address space/%d %d\n", which, type);
+			ASSERT(FALSE); 
+		}
+		case OverflowException: {
+			printf("Interger overflow in add or sub/%d %d\n", which, type);
+			ASSERT(FALSE);
+		}
+		case IllegalInstrException: {
+			printf("Unimplemented or reserved instruction/%d %d\n", which, type);
+			ASSERT(FALSE);
+		}
+		case NumExceptionTypes: {}
+		default: {
+			printf("Unexpected user mode exception %d %d\n", which, type);
+			ASSERT(FALSE);
+		}
+	}
+=======
 
     if ((which == SyscallException) && (type == SC_Halt)) {
 	DEBUG('a', "Shutdown, initiated by user program.\n");
@@ -60,4 +131,5 @@ ExceptionHandler(ExceptionType which)
 	printf("Unexpected user mode exception %d %d\n", which, type);
 	ASSERT(FALSE);
     }
+>>>>>>> efed15cba95bba139952880b797f7f9b0103e287
 }
