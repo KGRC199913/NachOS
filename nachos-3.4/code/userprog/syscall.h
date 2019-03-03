@@ -132,8 +132,15 @@ void Yield();
 
 
 /* Read an integer from SynchConsole
+ * @return: integer read from SynchConsole, 0 if not an valid integer 
  */
 int ReadInt();
+
+/* Print an integer to SynchConsole
+ * @param number: an integer to print
+ */
+void PrintInt(int number);
+
 #endif /* IN_ASM */
 
 #endif /* SYSCALL_H */

@@ -48,7 +48,7 @@
 //	are in machine.h.
 //----------------------------------------------------------------------
 
-#define Max_INT32_LENGTH	5
+#define MAX_INT32_LENGTH	5
 
 void ExceptionHandler_NonSyscall(ExceptionType which, int type) {
     /*
@@ -125,10 +125,11 @@ ExceptionHandler(ExceptionType which)
                 // case SC_Fork:{}
                 // case SC_Yield:{}
 		case SC_ReadInt: {
-			DEBUG('a', "Reached ExceptionHandler");
+			DEBUG('a', "Reached ReadInt");
 			int numberRead = 0;
 			int numberOfDigits = 0;
 			int negativeModifier = 1;
+			bool isInt = true;
 			char* OneByteBuffer = new char[2]; //preserved for terminated char
 			
 			int consoleStatusNum = 0;
@@ -145,6 +146,7 @@ ExceptionHandler(ExceptionType which)
 							break;
 						}
 					} else {
+						isInt = false;
 						break;
 					}
 				} else {
@@ -152,13 +154,44 @@ ExceptionHandler(ExceptionType which)
 					numberRead += (OneByteBuffer[0] - 48);
 					++numberOfDigits;
 				}
-			} while (numberOfDigits < Max_INT32_LENGTH);
+			} while (numberOfDigits < MAX_INT32_LENGTH);
+			numberRead *= isInt;
 			numberRead *= negativeModifier;
 			machine->WriteRegister(2, numberRead);
 			
 			delete[]OneByteBuffer;
 			printf("\n\n\tThe number read = %d\n", numberRead); // DEGBUG MESSAGE, TO BE DELETE
 		}			
+			break;
+		case SC_PrintInt: {
+			int numberToPrint = machine->ReadRegister(4);
+
+			char* buffer = new char[MAX_INT32_LENGTH + 2]; // preserved for negative and terminated \0
+			int bufferCurrentPositionPtr = 0;	
+			int numberLength = 0;		
+			if (numberToPrint < 0) {
+				buffer[bufferCurrentPositionPtr++] = '-';
+				numberToPrint = -numberToPrint;		
+				++numberLength;	
+			}
+
+			int maskNum = 1;
+			for (int numberToPrintCopy = numberToPrint; numberToPrintCopy != 0; numberToPrintCopy /= 10) {
+				maskNum *= 10;
+				++numberLength;
+			}  // loop to ensure flexibility
+			maskNum /= 10;
+	
+			do {
+				buffer[bufferCurrentPositionPtr++] = (numberToPrint / maskNum) + 48;
+				numberToPrint %= maskNum;
+				maskNum /= 10;
+			} while (maskNum != 0);
+			buffer[bufferCurrentPositionPtr] = 0;
+			
+			gSynchConsole->Write(buffer, numberLength);
+			delete[]buffer;
+		}
 			break;
                 default:{}
         }

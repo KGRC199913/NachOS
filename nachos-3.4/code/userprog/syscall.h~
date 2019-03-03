@@ -130,6 +130,10 @@ void Fork(void (*func)());
  */
 void Yield();		
 
+
+/* Read an integer from SynchConsole
+ */
+int ReadInt();
 #endif /* IN_ASM */
 
 #endif /* SYSCALL_H */
