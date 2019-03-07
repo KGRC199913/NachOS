@@ -180,7 +180,6 @@ Cleanup()
     
 #ifdef USER_PROGRAM
     delete machine;
-    delete gSynchConsole;
 #endif
 
 #ifdef FILESYS_NEEDED

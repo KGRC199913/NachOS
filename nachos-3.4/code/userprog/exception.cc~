@@ -143,6 +143,7 @@ ExceptionHandler(ExceptionType which)
 						if (OneByteBuffer[0] == '-') {
 							negativeModifier = -1;
 						} else {
+							isInt = false;
 							break;
 						}
 					} else {
@@ -158,17 +159,21 @@ ExceptionHandler(ExceptionType which)
 			numberRead *= isInt;
 			numberRead *= negativeModifier;
 			machine->WriteRegister(2, numberRead);
-			
 			delete[]OneByteBuffer;
-			printf("\n\n\tThe number read = %d\n", numberRead); // DEGBUG MESSAGE, TO BE DELETE
 		}			
 			break;
 		case SC_PrintInt: {
 			int numberToPrint = machine->ReadRegister(4);
+			if (numberToPrint == 0) {
+				char zero = '0';
+				gSynchConsole->Write(&zero, 1);
+				break;
+			}
 
 			char* buffer = new char[MAX_INT32_LENGTH + 2]; // preserved for negative and terminated \0
 			int bufferCurrentPositionPtr = 0;	
 			int numberLength = 0;		
+
 			if (numberToPrint < 0) {
 				buffer[bufferCurrentPositionPtr++] = '-';
 				numberToPrint = -numberToPrint;		
@@ -181,18 +186,28 @@ ExceptionHandler(ExceptionType which)
 				++numberLength;
 			}  // loop to ensure flexibility
 			maskNum /= 10;
-	
+
 			do {
 				buffer[bufferCurrentPositionPtr++] = (numberToPrint / maskNum) + 48;
 				numberToPrint %= maskNum;
 				maskNum /= 10;
 			} while (maskNum != 0);
 			buffer[bufferCurrentPositionPtr] = 0;
-			
-			printf("%d\n", numberLength); // DBG
-			
+
 			gSynchConsole->Write(buffer, numberLength);
 			delete[]buffer;
+		}
+			break;
+		case SC_ReadChar: {
+			char readBuffer[2]; // preserved for \0
+			gSynchConsole->Read(readBuffer, 1);
+			
+			machine->WriteRegister(2, readBuffer[0]);
+		}
+			break;
+		case SC_PrintChar: {
+			char chToPrint = static_cast<char>(machine->ReadRegister(4));
+			gSynchConsole->Write(&chToPrint, 1);
 		}
 			break;
                 default:{}

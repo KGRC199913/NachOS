@@ -141,6 +141,16 @@ int ReadInt();
  */
 void PrintInt(int number);
 
+/* Read a character from SynchConsole
+ * @return: a character
+ */
+char ReadChar();
+
+/* Print a character to SynchConsole
+ * @param: a character to print
+ */
+void PrintChar();
+
 #endif /* IN_ASM */
 
 #endif /* SYSCALL_H */

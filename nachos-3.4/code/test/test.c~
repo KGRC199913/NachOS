@@ -1,7 +1,6 @@
 #include "syscall.h"
 
 int main() {
-	int n = ReadInt();
-	PrintInt(n);
+	PrintInt(0);
 	return 0;
 }
