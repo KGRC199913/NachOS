@@ -179,6 +179,9 @@ Cleanup()
 #endif
     
 #ifdef USER_PROGRAM
+    char* discardBuffer = new char[1024];
+    gSynchConsole->Read(discardBuffer, 1024);
+    delete[]discardBuffer;
     delete machine;
     delete gSynchConsole;
 #endif

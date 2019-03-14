@@ -49,6 +49,7 @@
 //----------------------------------------------------------------------
 
 #define MAX_INT32_LENGTH	5
+#define MAX_BUFFER_SIZE		1024
 
 void ExceptionHandler_NonSyscall(ExceptionType which, int type) {
     /*
@@ -125,13 +126,12 @@ ExceptionHandler(ExceptionType which)
                 // case SC_Fork:{}
                 // case SC_Yield:{}
 		case SC_ReadInt: {
-			DEBUG('a', "Reached ReadInt");
 			int numberRead = 0;
 			int numberOfDigits = 0;
 			int negativeModifier = 1;
 			bool isInt = true;
 			char* OneByteBuffer = new char[2]; //preserved for terminated char
-			
+			OneByteBuffer[1] = 0;			
 			int consoleStatusNum = 0;
 			do {
 				consoleStatusNum = gSynchConsole->Read(OneByteBuffer, 1);
@@ -147,7 +147,8 @@ ExceptionHandler(ExceptionType which)
 							break;
 						}
 					} else {
-						isInt = false;
+						if (OneByteBuffer[0] != ' ')
+							isInt = false;
 						break;
 					}
 				} else {
@@ -171,6 +172,11 @@ ExceptionHandler(ExceptionType which)
 			}
 
 			char* buffer = new char[MAX_INT32_LENGTH + 2]; // preserved for negative and terminated \0
+			if (!buffer) {
+				DEBUG('a', "Failed to init a read buffer at PrintInt");
+				break;
+			}
+
 			int bufferCurrentPositionPtr = 0;	
 			int numberLength = 0;		
 
@@ -210,10 +216,41 @@ ExceptionHandler(ExceptionType which)
 			gSynchConsole->Write(&chToPrint, 1);
 		}
 			break;
+		case SC_ReadString: {
+			char* readBuffer = new char[MAX_BUFFER_SIZE];
+			if (!readBuffer) {
+				DEBUG('a', "Failed to init a read buffer at ReadString");
+				break;
+			}
+			
+			int strUserAddress = machine->ReadRegister(4);
+			int length = machine->ReadRegister(5);
+			int actualReadCharacterNumber = gSynchConsole->Read(readBuffer, length);
+			readBuffer[actualReadCharacterNumber] = 0;
+			machine->System2User(strUserAddress, actualReadCharacterNumber + 1, readBuffer);
+			delete[]readBuffer;
+		}
+			break;
+		case SC_PrintString: {
+			int toPrintStrAddr = machine->ReadRegister(4);
+			char* buffer = new char[MAX_BUFFER_SIZE];
+			if (!buffer) {
+				DEBUG('a', "Failed to init a read buffer at PrintString");
+				break;
+			}
+			buffer = machine->User2System(toPrintStrAddr, MAX_BUFFER_SIZE);
+			
+			int curStrPtr = 0;
+			while (buffer[curStrPtr] != 0) {
+				gSynchConsole-> Write(buffer + curStrPtr, 1);
+				++curStrPtr;
+			} // Because we dont know the lenght of the print str, we'll print it char by char
+			delete[]buffer;
+		}
+			break;
                 default:{}
         }
 	// Advance program counters.
-
     	machine->registers[PrevPCReg] = machine->registers[PCReg];
     	machine->registers[PCReg] = machine->registers[NextPCReg];
     	machine->registers[NextPCReg] += 4;

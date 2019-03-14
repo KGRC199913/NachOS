@@ -151,6 +151,17 @@ char ReadChar();
  */
 void PrintChar();
 
+/* Read a string from SynchConsole
+ * @param1: a buffer to read to
+ * @param2: lenght of desire string to be read (Must be longer or equal to the actual input string)
+ */
+void ReadString (char* buffer, int length);
+
+/* Print a string to SynchConsole
+ * @param: a buffer to be printed
+ */
+void PrintString (char* buffer);
+
 #endif /* IN_ASM */
 
 #endif /* SYSCALL_H */

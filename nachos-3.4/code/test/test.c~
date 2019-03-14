@@ -1,6 +1,6 @@
 #include "syscall.h"
 
 int main() {
-	PrintInt(0);
+	PrintString("Test");
 	return 0;
 }
