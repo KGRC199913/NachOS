@@ -143,13 +143,17 @@ ExceptionHandler(ExceptionType which)
 						if (OneByteBuffer[0] == '-') {
 							negativeModifier = -1;
 						} else {
+							if (OneByteBuffer[0] == ' ') {
+								continue;							
+							}
 							isInt = false;
 							break;
 						}
 					} else {
 						if (OneByteBuffer[0] != ' ')
 							isInt = false;
-						break;
+						else
+							break;
 					}
 				} else {
 					numberRead *= 10;
@@ -254,7 +258,6 @@ ExceptionHandler(ExceptionType which)
     	machine->registers[PrevPCReg] = machine->registers[PCReg];
     	machine->registers[PCReg] = machine->registers[NextPCReg];
     	machine->registers[NextPCReg] += 4;
-	printf("n\n");
     } else {
 	ExceptionHandler_NonSyscall(which, type);
     }	

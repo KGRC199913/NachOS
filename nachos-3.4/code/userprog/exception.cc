@@ -143,13 +143,17 @@ ExceptionHandler(ExceptionType which)
 						if (OneByteBuffer[0] == '-') {
 							negativeModifier = -1;
 						} else {
+							if (OneByteBuffer[0] == ' ') {
+								continue;							
+							}
 							isInt = false;
 							break;
 						}
 					} else {
 						if (OneByteBuffer[0] != ' ')
 							isInt = false;
-						break;
+						else
+							break;
 					}
 				} else {
 					numberRead *= 10;
