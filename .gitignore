@@ -30,7 +30,15 @@
 *.exe
 *.out
 *.app
+*.coff
 
 # Folder
 gnu-decstation-ultrix/
+
+# BackUp files
+*.cc~
+*.o~
+*.c~
+*.h~
+*.cpp~
 

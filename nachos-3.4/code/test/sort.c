@@ -24,6 +24,7 @@ int main() {
 		PrintInt(arr[i]);
 		PrintChar(" \n"[i == (n - 1)]);
 	}
-
+	
+	Halt();
 	return 0;
 }

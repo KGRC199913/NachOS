@@ -35,7 +35,7 @@ CPP = gcc -E
 INCDIR =-I../userprog -I../threads
 CFLAGS = -G 0 -c $(INCDIR)
 
-all: halt shell matmult sort test help text
+all: halt shell matmult sort test help text ReadInt PrintInt ReadChar PrintChar ReadString PrintString
 
 start.o: start.s ../userprog/syscall.h
 	$(CPP) $(CPPFLAGS) start.c > strt.s
@@ -83,3 +83,33 @@ text.o: text.c
 text: text.o start.o
 	$(LD) $(LDFLAGS) start.o text.o -o text.coff
 	../bin/coff2noff text.coff text
+
+ReadInt.o: ReadInt.c
+ReadInt: ReadInt.o start.o
+	$(LD) $(LDFLAGS) start.o ReadInt.o -o ReadInt.coff
+	../bin/coff2noff ReadInt.coff ReadInt
+
+PrintInt.o: PrintInt.c
+PrintInt: PrintInt.o start.o
+	$(LD) $(LDFLAGS) start.o PrintInt.o -o PrintInt.coff
+	../bin/coff2noff PrintInt.coff PrintInt
+
+ReadChar.o: ReadChar.c
+ReadChar: ReadChar.o start.o
+	$(LD) $(LDFLAGS) start.o ReadChar.o -o ReadChar.coff
+	../bin/coff2noff ReadChar.coff ReadChar
+
+PrintChar.o: PrintChar.c
+PrintChar: PrintChar.o start.o
+	$(LD) $(LDFLAGS) start.o PrintChar.o -o PrintChar.coff
+	../bin/coff2noff PrintChar.coff PrintChar
+
+ReadString.o: ReadString.c
+ReadString: ReadString.o start.o
+	$(LD) $(LDFLAGS) start.o ReadString.o -o ReadString.coff
+	../bin/coff2noff ReadString.coff ReadString
+
+PrintString.o: PrintString.c
+PrintString: PrintString.o start.o
+	$(LD) $(LDFLAGS) start.o PrintString.o -o PrintString.coff
+	../bin/coff2noff PrintString.coff PrintString

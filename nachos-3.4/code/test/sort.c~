@@ -19,10 +19,12 @@ int main() {
 		}
 	}
 
+	PrintString("Sorted Array:\n");
 	for (i = 0; i < n; ++i) {
 		PrintInt(arr[i]);
 		PrintChar(" \n"[i == (n - 1)]);
 	}
-
+	
+	Halt();
 	return 0;
 }

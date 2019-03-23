@@ -14,6 +14,6 @@ int main() {
 	PrintString("@Sort Program:\n");
 	PrintString("    +Name: sort\n");
 	PrintString("    +Description: Allow user to input an int array and print sorted version of that array\n");	
-	
+	Halt();
 	return 0;
 }
