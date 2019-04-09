@@ -22,7 +22,7 @@
 #define SC_Exit		1
 #define SC_Exec		2
 #define SC_Join		3
-#define SC_Create	4
+#define SC_CreateFile   4
 #define SC_Open		5
 #define SC_Read		6
 #define SC_Write	7
@@ -35,6 +35,7 @@
 #define SC_PrintChar	14
 #define SC_ReadString	15
 #define	SC_PrintString	16
+#define SC_Seek		17
 
 #ifndef IN_ASM
 
@@ -91,9 +92,7 @@ typedef int OpenFileId;
 
 #define ConsoleInput	0  
 #define ConsoleOutput	1  
- 
-/* Create a Nachos file, with "name" */
-void Create(char *name);
+
 
 /* Open the Nachos file "name", and return an "OpenFileId" that can 
  * be used to read and write to the file.
@@ -113,7 +112,6 @@ int Read(char *buffer, int size, OpenFileId id);
 
 /* Close the file, we're done reading and writing to it. */
 void Close(OpenFileId id);
-
 
 
 /* User-level thread operations: Fork and Yield.  To allow multiple
@@ -161,6 +159,9 @@ void ReadString (char* buffer, int length);
  * @param: a buffer to be printed
  */
 void PrintString (char* buffer);
+
+/* Create a Nachos file, with "name" */
+int CreateFile (char* name);
 
 #endif /* IN_ASM */
 

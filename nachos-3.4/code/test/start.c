@@ -186,29 +186,29 @@ CreateFile:
 	j       $31
 	.end CreateFile
 
-        .globl OpenFile
-        .ent   OpenFile
-OpenFile:
-        addiu $2, $0, SC_OpenFileID
+        .globl Open
+        .ent   Open
+Open:
+        addiu $2, $0, SC_Open
         syscall
         j	$31
-        .end OpenFile
+        .end Open
 
-        .globl CloseFile
-	.ent   CloseFile
-CloseFile:
-        addiu $2, $0, SC_CloseFile
+        .globl Close
+	.ent   Close
+Close:
+        addiu $2, $0, SC_Close
         syscall
         j	$31
-        .end CloseFile
+        .end Close
 
-	.globl ReadFile
-	.ent   ReadFile
-ReadFile:
-	addiu $2, $0, SC_ReadFile
+	.globl Read
+	.ent   Read
+Read:
+	addiu $2, $0, SC_Read
 	syscall
 	j	$31
-	.end ReadFile
+	.end Read
 /* dummy function to keep gcc happy */
         .globl  __main
         .ent    __main

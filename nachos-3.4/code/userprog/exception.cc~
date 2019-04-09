@@ -252,6 +252,89 @@ ExceptionHandler(ExceptionType which)
 			delete[]buffer;
 		}
 			break;
+                case SC_CreateFile: {
+                        int toCreateFileAddr = machine->ReadRegister(4);
+                        char* buffer = new char [MAX_BUFFER_SIZE];
+                        buffer = machine->User2System(toCreateFileAddr, MAX_BUFFER_SIZE);
+                        if (fileSystem->Create(buffer, 0) == false)
+				{
+					DEBUG('f',"Unsucessful");
+					machine->WriteRegister(2, -1);
+				} else
+				{
+					DEBUG('f',"Successful");
+					machine->WriteRegister(2, 0);
+				};
+			delete [] buffer;
+			break;
+                }
+                case SC_Open: {
+			int bufferAddress = machine->ReadRegister(4); // read string pointer from user
+			int type = machine->ReadRegister(5);
+			char *buffer = new char[MAX_BUFFER_SIZE];
+			buffer = machine->User2System(bufferAddress, MAX_BUFFER_SIZE);
+                        bool check = false;
+			int i;
+                        for (i=0;i<10;i++)
+			{
+				OpenFile* f = fileSystem->Open(buffer);
+				if (f)
+					if ((fileSystem->FileList[i] == NULL) && (!check) && (fileSystem->countfile < 11))
+					{
+				    		fileSystem->FileList[i] = f;
+                                    		fileSystem->type[i] = type;
+                                    		check = true;
+                                    		fileSystem->countfile++;
+				    		break;
+					}
+			}
+
+                        if (check==false)
+                        {
+				DEBUG('f',"unsucessful");
+                                machine->WriteRegister(2, -1);
+                                delete []buffer;
+                                break;
+			}
+			else
+                        {
+				DEBUG('f',"Successful");
+				machine->WriteRegister(2, i - 1);
+			};
+			delete [] buffer;
+			break;
+		}
+                case SC_Close: {
+			int id = machine->ReadRegister(4);
+                        bool check=false;
+			if ((fileSystem->FileList[id]) && (id > 2) && (id < 10)) {
+				delete fileSystem->FileList[id];
+				fileSystem->FileList[id] = NULL;
+				fileSystem->type[id] = 0;	
+				check = true;			
+			}                        
+
+                        if (check)
+ 			{
+				DEBUG('f'," File Closed Successfully");
+				machine->WriteRegister(2,0);
+			} 
+			else
+			{
+				DEBUG('f',"File Closed Unsuccessfully");
+				machine->WriteRegister(2,-1);
+			}
+                        break;
+		}
+		case SC_Read: {
+				
+		}
+		case SC_Write: {
+		
+		}
+		case SC_Seek: {
+
+		}		
                 default:{}
         }
 	// Advance program counters.
@@ -262,5 +345,6 @@ ExceptionHandler(ExceptionType which)
 	ExceptionHandler_NonSyscall(which, type);
     }	
 }
+
 
 

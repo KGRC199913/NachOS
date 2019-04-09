@@ -34,14 +34,21 @@
 
 #ifndef FS_H
 #define FS_H
-
+#define MAXFILE 10
 #include "copyright.h"
 #include "openfile.h"
 
 #ifdef FILESYS_STUB 		// Temporarily implement file system calls as 
 				// calls to UNIX, until the real file system
 				// implementation is available
+const int countfile = 0; 
+
+
 class FileSystem {
+  public:
+     OpenFile* FileList[MAXFILE];
+     int type[MAXFILE];
+     int countfile;
   public:
     FileSystem(bool format) {}
 
@@ -61,11 +68,14 @@ class FileSystem {
       }
 
     bool Remove(char *name) { return Unlink(name) == 0; }
-
 };
 
 #else // FILESYS
 class FileSystem {
+  public:
+     OpenFile* FileList[MAXFILE];
+     int type[MAXFILE];
+     int countfile;
   public:
     FileSystem(bool format);		// Initialize the file system.
 					// Must be called *after* "synchDisk" 
@@ -90,7 +100,10 @@ class FileSystem {
 					// represented as a file
    OpenFile* directoryFile;		// "Root" directory -- list of 
 					// file names, represented as a file
+ 
 };
+
+
 
 #endif // FILESYS
 
