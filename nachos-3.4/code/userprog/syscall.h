@@ -97,10 +97,10 @@ typedef int OpenFileId;
 /* Open the Nachos file "name", and return an "OpenFileId" that can 
  * be used to read and write to the file.
  */
-OpenFileId Open(char *name);
+OpenFileId Open(char *name, int type);
 
 /* Write "size" bytes from "buffer" to the open file. */
-void Write(char *buffer, int size, OpenFileId id);
+int Write(char *buffer, int size, OpenFileId id);
 
 /* Read "size" bytes from the open file into "buffer".  
  * Return the number of bytes actually read -- if the open file isn't
@@ -111,8 +111,10 @@ void Write(char *buffer, int size, OpenFileId id);
 int Read(char *buffer, int size, OpenFileId id);
 
 /* Close the file, we're done reading and writing to it. */
-void Close(OpenFileId id);
+//void Close(OpenFileId id); //nope, forget about this
 
+/* ACTUAL FUNCTION to Close the file, we're done reading and writing to it. */
+int CloseF(OpenFileId id);
 
 /* User-level thread operations: Fork and Yield.  To allow multiple
  * threads to run within a user program. 
@@ -162,7 +164,8 @@ void PrintString (char* buffer);
 
 /* Create a Nachos file, with "name" */
 int CreateFile (char* name);
-
+/* move file cursor to pos location */
+int Seek(int pos, OpenFileId id);
 #endif /* IN_ASM */
 
 #endif /* SYSCALL_H */

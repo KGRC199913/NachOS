@@ -77,7 +77,7 @@ Join:
 	.globl Create
 	.ent	Create
 Create:
-	addiu $2,$0,SC_Create
+	addiu $2,$0,SC_CreateFile
 	syscall
 	j	$31
 	.end Create
@@ -106,13 +106,13 @@ Write:
 	j	$31
 	.end Write
 
-	.globl Close
-	.ent	Close
-Close:
+	.globl CloseF
+	.ent	CloseF
+CloseF:
 	addiu $2,$0,SC_Close
 	syscall
 	j	$31
-	.end Close
+	.end CloseF
 
 	.globl Fork
 	.ent	Fork
@@ -177,6 +177,7 @@ PrintString:
 	syscall
 	j	$31
 	.end PrintString
+
         .globl CreateFile
         .ent   CreateFile
 CreateFile:
@@ -185,29 +186,14 @@ CreateFile:
 	j       $31
 	.end CreateFile
 
-        .globl Open
-        .ent   Open
-Open:
-        addiu $2, $0, SC_Open
-        syscall
-        j	$31
-        .end Open
-
-        .globl Close
-	.ent   Close
-Close:
-        addiu $2, $0, SC_Close
-        syscall
-        j	$31
-        .end Close
-
-	.globl Read
-	.ent   Read
-Read:
-	addiu $2, $0, SC_Read
+        .globl Seek
+        .ent   Seek
+Seek:
+	addiu $2, $0, SC_Seek
 	syscall
-	j	$31
-	.end Read
+	j       $31
+	.end Seek
+
 /* dummy function to keep gcc happy */
         .globl  __main
         .ent    __main

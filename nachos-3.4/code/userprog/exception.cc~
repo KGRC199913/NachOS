@@ -115,16 +115,6 @@ ExceptionHandler(ExceptionType which)
    	                Exit(0);
                     break;
                 }
-                // case SC_Exec:{
-                // 
-                // }
-                // case SC_Join:{}
-                // case SC_Create:{}
-                // case SC_Open:{}
-                // case SC_Read:{}
-                // case SC_Close:{}
-                // case SC_Fork:{}
-                // case SC_Yield:{}
 		case SC_ReadInt: {
 			int numberRead = 0;
 			int numberOfDigits = 0;
@@ -243,7 +233,6 @@ ExceptionHandler(ExceptionType which)
 				break;
 			}
 			buffer = machine->User2System(toPrintStrAddr, MAX_BUFFER_SIZE);
-			
 			int curStrPtr = 0;
 			while (buffer[curStrPtr] != 0) {
 				gSynchConsole-> Write(buffer + curStrPtr, 1);
@@ -257,7 +246,8 @@ ExceptionHandler(ExceptionType which)
                         char* buffer = new char [MAX_BUFFER_SIZE];
                         buffer = machine->User2System(toCreateFileAddr, MAX_BUFFER_SIZE);
                         if (fileSystem->Create(buffer, 0) == false)
-				{
+				{	
+					//TODO: Duplicate name
 					DEBUG('f',"Unsucessful");
 					machine->WriteRegister(2, -1);
 				} else
@@ -275,18 +265,19 @@ ExceptionHandler(ExceptionType which)
 			buffer = machine->User2System(bufferAddress, MAX_BUFFER_SIZE);
                         bool check = false;
 			int i;
-                        for (i=0;i<10;i++)
+                        for (i=2;i<10;i++)
 			{
 				OpenFile* f = fileSystem->Open(buffer);
-				if (f)
+				if (f) {
 					if ((fileSystem->FileList[i] == NULL) && (!check) && (fileSystem->countfile < 11))
 					{
 				    		fileSystem->FileList[i] = f;
                                     		fileSystem->type[i] = type;
                                     		check = true;
-                                    		fileSystem->countfile++;
+                                    		++fileSystem->countfile;
 				    		break;
 					}
+				}
 			}
 
                         if (check==false)
@@ -299,7 +290,7 @@ ExceptionHandler(ExceptionType which)
 			else
                         {
 				DEBUG('f',"Successful");
-				machine->WriteRegister(2, i - 1);
+				machine->WriteRegister(2, i);
 			};
 			delete [] buffer;
 			break;
@@ -311,6 +302,7 @@ ExceptionHandler(ExceptionType which)
 				delete fileSystem->FileList[id];
 				fileSystem->FileList[id] = NULL;
 				fileSystem->type[id] = 0;	
+				--fileSystem->countfile;
 				check = true;			
 			}                        
 
@@ -327,13 +319,85 @@ ExceptionHandler(ExceptionType which)
                         break;
 		}
 		case SC_Read: {
-				
+			int userBufferAddress = machine->ReadRegister(4);
+			int length = machine->ReadRegister(5);
+			int id = machine->ReadRegister(6);
+			char * buffer = new char[4096];
+			int actualRead = 0;
+			if (id == 1 || id < 0 || id > 10) { // read from output console or invalid fileID
+				machine->WriteRegister(4, -1);
+				delete[]buffer;
+				break;			
+			}
+			if (id == 0) { //console
+				actualRead = gSynchConsole->Read(buffer, length); 
+			} else { //file
+				if (!fileSystem->FileList[id]) { // no opnened file with id
+					machine->WriteRegister(4, -1);
+					delete[]buffer;
+					break;
+				}
+				actualRead = fileSystem->FileList[id]->Read(buffer, length);
+			}
+			actualRead = (actualRead == 0 || actualRead == -1) ? -2 : actualRead;
+			machine->WriteRegister(4, actualRead);
+			machine->System2User(userBufferAddress, actualRead, buffer);
+			delete[]buffer;
+			break;
 		}
 		case SC_Write: {
-		
+			int toWriteAddress = machine->ReadRegister(4);
+			int length = machine->ReadRegister(5);
+			int id = machine->ReadRegister(6);
+			char * buffer = new char[4096];
+			int actualWrite = 0;
+			if (fileSystem->type[id] == 1) { // Read only files
+				machine->WriteRegister(4, -1);
+				delete[]buffer;
+				break;	
+			}
+			if (id <= 0 || id > 10) { // write to input console or invalid id
+				machine->WriteRegister(4, -1);
+				delete[]buffer;
+				break;	
+			}
+			buffer = machine->User2System(toWriteAddress, 4096);
+			if (id == 1) { //console
+				while (buffer[actualWrite] != 0) {
+					gSynchConsole-> Write(buffer + actualWrite, 1);
+					++actualWrite;
+				}
+				--actualWrite;
+			} else {
+				if (!fileSystem->FileList[id]) { // no opnened file with id
+					machine->WriteRegister(4, -1);
+					delete[]buffer;
+					break;
+				}
+				while (buffer[actualWrite] != 0) {
+					fileSystem->FileList[id]->Write(buffer + actualWrite, 1);
+					++actualWrite;
+				}
+				--actualWrite;
+			}
+			machine->WriteRegister(4, actualWrite);
+			delete[]buffer;
+			break;
 		}
 		case SC_Seek: {
-
+			int pos = machine->ReadRegister(4);
+			int id = machine->ReadRegister(5);
+			if (id < 2 || id > 10 || !fileSystem->FileList[id]) {
+				machine->WriteRegister(4, -1);
+				break;
+			}
+			int len = fileSystem->FileList[id]->Length();
+			if (pos == -1 || pos > len) {
+				pos = len;
+			}
+			fileSystem->FileList[id]->Seek(pos);
+			machine->WriteRegister(4, pos);
+			break;
 		}		
                 default:{}
         }

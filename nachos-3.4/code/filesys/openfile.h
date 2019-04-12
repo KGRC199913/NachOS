@@ -32,7 +32,10 @@ class OpenFile {
     ~OpenFile() { Close(file); }			// close the file
 
     int ReadAt(char *into, int numBytes, int position) { 
-    		Lseek(file, position, 0); 
+    		Lseek(file, position, 0);
+		//int r = ReadPartial(file, into, numBytes);
+		//printf("> %s <\n", into);		
+		//return r;
 		return ReadPartial(file, into, numBytes); 
 		}	
     int WriteAt(char *from, int numBytes, int position) { 
@@ -50,6 +53,17 @@ class OpenFile {
 		currentOffset += numWritten;
 		return numWritten;
 		}
+    int Seek(int pos) {
+		int l = Length();
+		if (pos == -1) {
+			currentOffset = l;	
+		} else {
+			if (pos > l)
+				pos = l;
+			currentOffset = pos;
+		}
+		return currentOffset;
+	}
 
     int Length() { Lseek(file, 0, 2); return Tell(file); }
     
