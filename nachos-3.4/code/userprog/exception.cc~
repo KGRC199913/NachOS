@@ -24,6 +24,8 @@
 #include "copyright.h"
 #include "system.h"
 #include "syscall.h"
+#include <string>
+#include <string.h>
 
 //----------------------------------------------------------------------
 // ExceptionHandler
@@ -227,12 +229,8 @@ ExceptionHandler(ExceptionType which)
 			break;
 		case SC_PrintString: {
 			int toPrintStrAddr = machine->ReadRegister(4);
-			char* buffer = new char[MAX_BUFFER_SIZE];
-			if (!buffer) {
-				DEBUG('a', "Failed to init a read buffer at PrintString");
-				break;
-			}
-			buffer = machine->User2System(toPrintStrAddr, MAX_BUFFER_SIZE);
+			
+			char* buffer = machine->User2System(toPrintStrAddr, MAX_BUFFER_SIZE);
 			int curStrPtr = 0;
 			while (buffer[curStrPtr] != 0) {
 				gSynchConsole-> Write(buffer + curStrPtr, 1);
@@ -243,8 +241,24 @@ ExceptionHandler(ExceptionType which)
 			break;
                 case SC_CreateFile: {
                         int toCreateFileAddr = machine->ReadRegister(4);
-                        char* buffer = new char [MAX_BUFFER_SIZE];
-                        buffer = machine->User2System(toCreateFileAddr, MAX_BUFFER_SIZE);
+                        char* buffer = machine->User2System(toCreateFileAddr, MAX_BUFFER_SIZE);
+			std::string str(buffer);
+			delete[]buffer;
+			buffer = strdup(str.c_str());
+			OpenFile* test = fileSystem->Open(buffer);
+			int pos;
+			while (test != NULL) {
+				delete test;
+				pos = str.find_last_of(".");
+				std::string filename = str.substr(0, pos);
+				std::string extension = str.substr(pos);
+				filename += std::string("_copy");
+				str = filename + extension;
+				delete[]buffer;
+				buffer = strdup(str.c_str());
+				test = fileSystem->Open(buffer);
+			}
+
                         if (fileSystem->Create(buffer, 0) == false)
 				{	
 					//TODO: Duplicate name
@@ -255,14 +269,13 @@ ExceptionHandler(ExceptionType which)
 					DEBUG('f',"Successful");
 					machine->WriteRegister(2, 0);
 				};
-			delete [] buffer;
+			delete[]buffer;
 			break;
                 }
                 case SC_Open: {
 			int bufferAddress = machine->ReadRegister(4); // read string pointer from user
 			int type = machine->ReadRegister(5);
-			char *buffer = new char[MAX_BUFFER_SIZE];
-			buffer = machine->User2System(bufferAddress, MAX_BUFFER_SIZE);
+			char* buffer = machine->User2System(bufferAddress, MAX_BUFFER_SIZE);
                         bool check = false;
 			int i;
                         for (i=2;i<10;i++)
@@ -325,22 +338,22 @@ ExceptionHandler(ExceptionType which)
 			char * buffer = new char[4096];
 			int actualRead = 0;
 			if (id == 1 || id < 0 || id > 10) { // read from output console or invalid fileID
-				machine->WriteRegister(4, -1);
+				machine->WriteRegister(2, -1);
 				delete[]buffer;
 				break;			
 			}
 			if (id == 0) { //console
-				actualRead = gSynchConsole->Read(buffer, length); 
+				actualRead = gSynchConsole->Read(buffer, length);
 			} else { //file
 				if (!fileSystem->FileList[id]) { // no opnened file with id
-					machine->WriteRegister(4, -1);
+					machine->WriteRegister(2, -1);
 					delete[]buffer;
 					break;
 				}
 				actualRead = fileSystem->FileList[id]->Read(buffer, length);
 			}
 			actualRead = (actualRead == 0 || actualRead == -1) ? -2 : actualRead;
-			machine->WriteRegister(4, actualRead);
+			machine->WriteRegister(2, actualRead);
 			machine->System2User(userBufferAddress, actualRead, buffer);
 			delete[]buffer;
 			break;
@@ -349,38 +362,38 @@ ExceptionHandler(ExceptionType which)
 			int toWriteAddress = machine->ReadRegister(4);
 			int length = machine->ReadRegister(5);
 			int id = machine->ReadRegister(6);
-			char * buffer = new char[4096];
+			char * buffer = NULL;
 			int actualWrite = 0;
 			if (fileSystem->type[id] == 1) { // Read only files
-				machine->WriteRegister(4, -1);
+				machine->WriteRegister(2, -1);
 				delete[]buffer;
 				break;	
 			}
 			if (id <= 0 || id > 10) { // write to input console or invalid id
-				machine->WriteRegister(4, -1);
+				machine->WriteRegister(2, -1);
 				delete[]buffer;
 				break;	
 			}
 			buffer = machine->User2System(toWriteAddress, 4096);
 			if (id == 1) { //console
-				while (buffer[actualWrite] != 0) {
+				while ((buffer[actualWrite] != 0) && (actualWrite < length)) {
 					gSynchConsole-> Write(buffer + actualWrite, 1);
 					++actualWrite;
 				}
 				--actualWrite;
 			} else {
 				if (!fileSystem->FileList[id]) { // no opnened file with id
-					machine->WriteRegister(4, -1);
+					machine->WriteRegister(2, -1);
 					delete[]buffer;
 					break;
 				}
-				while (buffer[actualWrite] != 0) {
+				while ((buffer[actualWrite] != 0) && (actualWrite < length)) {
 					fileSystem->FileList[id]->Write(buffer + actualWrite, 1);
 					++actualWrite;
 				}
 				--actualWrite;
 			}
-			machine->WriteRegister(4, actualWrite);
+			machine->WriteRegister(2, actualWrite);
 			delete[]buffer;
 			break;
 		}
@@ -388,7 +401,7 @@ ExceptionHandler(ExceptionType which)
 			int pos = machine->ReadRegister(4);
 			int id = machine->ReadRegister(5);
 			if (id < 2 || id > 10 || !fileSystem->FileList[id]) {
-				machine->WriteRegister(4, -1);
+				machine->WriteRegister(2, -1);
 				break;
 			}
 			int len = fileSystem->FileList[id]->Length();
@@ -396,7 +409,7 @@ ExceptionHandler(ExceptionType which)
 				pos = len;
 			}
 			fileSystem->FileList[id]->Seek(pos);
-			machine->WriteRegister(4, pos);
+			machine->WriteRegister(2, pos);
 			break;
 		}		
                 default:{}

@@ -2,8 +2,12 @@
 
 int main() {
 	OpenFileId id;
-	
-	id = Open("v.txt", 0);
-	PrintInt(id);
+	char buffer[10];
+	id = Open("a.b", 0);
+	Write("NEKONEKO", 9, id);
+	Seek(4, id);
+	Read(buffer, 4, id);
+	PrintString(buffer);
+	CloseF(id);
         return 0;
 }
