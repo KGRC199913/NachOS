@@ -159,6 +159,7 @@ Initialize(int argc, char **argv)
 
 #ifdef FILESYS_NEEDED
     fileSystem = new FileSystem(format);
+    fileSystem->countfile = 2;
 #endif
 
 #ifdef NETWORK

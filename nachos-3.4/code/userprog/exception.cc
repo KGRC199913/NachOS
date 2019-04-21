@@ -311,7 +311,7 @@ ExceptionHandler(ExceptionType which)
                 case SC_Close: {
 			int id = machine->ReadRegister(4);
                         bool check=false;
-			if ((fileSystem->FileList[id]) && (id > 2) && (id < 10)) {
+			if ((fileSystem->FileList[id]) && (id >= 2) && (id <= 9)) {
 				delete fileSystem->FileList[id];
 				fileSystem->FileList[id] = NULL;
 				fileSystem->type[id] = 0;	
@@ -337,7 +337,7 @@ ExceptionHandler(ExceptionType which)
 			int id = machine->ReadRegister(6);
 			char * buffer = new char[4096];
 			int actualRead = 0;
-			if (id == 1 || id < 0 || id > 10) { // read from output console or invalid fileID
+			if (id == 1 || id < 0 || id > 9) { // read from output console or invalid fileID
 				machine->WriteRegister(2, -1);
 				delete[]buffer;
 				break;			
@@ -367,9 +367,9 @@ ExceptionHandler(ExceptionType which)
 			if (fileSystem->type[id] == 1) { // Read only files
 				machine->WriteRegister(2, -1);
 				delete[]buffer;
-				break;	
+				break;
 			}
-			if (id <= 0 || id > 10) { // write to input console or invalid id
+			if (id <= 0 || id >= 10) { // write to input console or invalid id
 				machine->WriteRegister(2, -1);
 				delete[]buffer;
 				break;	
