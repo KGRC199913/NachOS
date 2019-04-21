@@ -26,7 +26,7 @@ int main() {
 	desId = Open(buffer, 0);
 	len = Seek(-1, srcId);
 	--len;
-	while (len >= 0) {
+	while (len > 0) {
 		--len;
 		Seek(len, srcId);
 		Read(buffer, 1, srcId);
